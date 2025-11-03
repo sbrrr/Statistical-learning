@@ -1,0 +1,54 @@
+# Chapter 5.4 Exercise 6
+
+```{r}
+set.seed(1)
+```
+
+
+```{r}
+suppressWarnings(suppressMessages(library("ISLR2")))
+```
+
+```{r}
+default <- Default$default
+income <- Default$income
+balance <- Default$balance
+
+
+mlr.fit <- glm(default ~ income + balance, data=Default, family = 'binomial')
+
+summary(mlr.fit)
+
+```
+
+From the summary we can see that the estimated standard errors for income and balance are `r format(summary(mlr.fit)$coefficients[,2][2:3], digits = 4, scientific = TRUE)` respectively
+
+b\)
+
+```{r}
+boot.fn <- function(dataset,index){
+  default <- dataset$default
+  income <- dataset$income
+  balance <- dataset$balance
+  lr.fit <- glm(default ~ income + balance, data=dataset[index,], family = 'binomial')
+  return(coef(lr.fit)[2:3]) #Outputs coefficients for income and balance
+}
+```
+
+
+c\)
+```{r}
+suppressMessages(library(boot))
+```
+
+```{r}
+set.seed(1)
+boot.results <- boot(data=Default, statistic=boot.fn, R=1000) #
+
+boot.standard_errors <- apply(boot.results$t, 2, sd) # boot.results$t is two long columns with coefficients, one for income one for balance. The 2 in the apply function calculates the std. error (sd) columnwise.
+
+print(boot.standard_errors)
+```
+
+The estimated standard error for income is `r format(boot.standard_errors[1], digits=4, scientific=TRUE)` and for balance `r format(boot.standard_errors[2], digits=4, scientific=TRUE)` 
+

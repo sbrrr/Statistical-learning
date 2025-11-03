@@ -1,0 +1,107 @@
+# Chapter 4.8 Exercise 14
+
+a\)
+```{r}
+suppressWarnings(library("ISLR2"))
+mpgmedian <- median(Auto[[1]])
+mpg01 <- numeric(length(Auto$mpg)) # Creates a zero vector same length as Auto$mpg
+
+for(i in 1:length(mpg01)){
+  if (Auto[[1]][i] >= mpgmedian) {
+    mpg01[i] = 1
+  }
+}
+
+# Changes the i-th element in mpg01 to 1 if mpg[i] >= median of mpg
+
+df <- data.frame (mpg01,Auto)
+```
+
+b\)
+```{r}
+suppressWarnings(suppressMessages(library(DataExplorer)))
+```
+
+```{r}
+suppressWarnings(plot_scatterplot(df, by = 'mpg01'))
+```
+
+Based on the scatter plot the features, excluding mpg, that seem most likely to be useful in predicting mpg01 are weight and horsepower.
+```{r}
+plot_boxplot(df, by = 'mpg01')
+```
+
+Based on the box plots cylinders and displacement might also be useful in addition to weight and horsepower.
+
+```{r}
+suppressWarnings(plot_correlation(df)) 
+```
+
+Based on the correlation matrix the useful predictors would be weight, horsepower, displacement and number of cylinders.
+
+c\)
+
+```{r}
+predictors <- c("cylinders", "displacement", "horsepower", "weight")
+set.seed(1)
+training_index <- sample.int(nrow(df),300)
+trainingdata <- df[training_index,]
+testdata <- df[-training_index, predictors]
+```
+
+
+
+d\)
+```{r}
+suppressMessages(library("MASS"))
+```
+
+
+```{r}
+lda.fit <- lda(mpg01 ~ cylinders + displacement + horsepower + weight, data=trainingdata)
+
+lda.pred <- predict(lda.fit, testdata)
+
+lda.conf_mat <- table(True = df$mpg01[-training_index], Predicted=lda.pred$class)
+#Confusion matrix
+
+lda.testerror <- 1 - mean(df$mpg01[-training_index] == lda.pred$class) 
+
+# Error rate = 1 - rate of correct classifications
+
+print(lda.conf_mat)
+```
+The test error of the LDA model is `r lda.testerror`
+
+e\)
+```{r}
+qda.fit <- qda(mpg01 ~ cylinders + displacement + horsepower + weight, data=trainingdata)
+
+qda.pred <- suppressWarnings(predict(qda.fit, testdata))
+
+qda.conf_mat <- table(True = df$mpg01[-training_index], Predicted=qda.pred$class)
+
+qda.testerror <- 1 - mean(df$mpg01[-training_index] == qda.pred$class)
+
+print(qda.conf_mat)
+```
+The test error of the QDA model is `r qda.testerror`
+
+f\)
+```{r}
+lr.fit <- glm(mpg01 ~ cylinders + displacement + horsepower + weight, data=trainingdata, family = 'binomial')
+
+lr.probs <- suppressWarnings(predict(lr.fit, testdata, type='response'))
+#P(Yhat=1|X)
+
+lr.pred <- ifelse(lr.probs > 0.5, 1, 0)
+#Classifies prediction probabilities as 1 if P(Yhat=1|X)>0.5 and 0 otherwise 
+
+lr.conf_mat <- table(True = df$mpg01[-training_index], Predicted=lr.pred)
+#Confusion matrix
+
+lr.testerror <- 1 - mean(df$mpg01[-training_index] == lr.pred)
+#Test error
+print(lr.conf_mat)
+```
+The test error of the logistic regression model is `r lr.testerror`

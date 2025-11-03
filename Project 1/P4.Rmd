@@ -1,0 +1,70 @@
+# Chapter 6.6 Exercise 10
+
+a\)
+```{r}
+set.seed(1)
+n=1000
+p=20
+
+X <- matrix(rnorm(n * p), nrow = n)
+# Creates 1000x20 matrix with random values form the standard normal distribution
+
+beta <- runif(p, -2, 2)
+# Creates beta with random numbers from the uniform distribution
+for (i in sample.int(20,4)) {
+  beta[i] <- 0
+}
+
+#Turns four random values in beta to 0
+
+epsilon <- rnorm(n, 0, 1)
+Y <- X %*% beta + epsilon
+
+data <- data.frame(Y = as.vector(Y), X)
+
+```
+b\)
+
+```{r}
+training_set_index <- sample(1:n, 100)
+
+training_set <- data[training_set_index,]
+test_set <- data[-training_set_index,]
+
+```
+
+c\)
+```{r}
+suppressWarnings(library(leaps))
+```
+
+```{r}
+regfit.full <- regsubsets(Y~.,training_set)
+mse.training <- 1/n * summary(regfit.full)$rss
+plot(1:8,mse.training, xlab = 'Number of features in model', ylab = 'MSE on training set')
+```
+
+d\)
+
+```{r}
+mse.test <- numeric(8)
+
+for (i in 1:8){
+  betas <- coef(regfit.full, id=i) #Betas of best model with i features
+  
+  features <- names(betas)[-1] # Names of the features in best model with i features
+  
+  X <- as.matrix(test_set[,features, drop=FALSE]) 
+  # Creates matrix with columns corresponding to best features
+  
+  X <- cbind("(Intercept)" = rep(1,nrow(X)),X) 
+  # Prepends a column with 1s to the matrix X to so each row in X is (1,x_0,...,x_i). Then we can do matrix multiplication of X and betas
+  
+  Yhat <- X%*%betas
+  mse.test[i] <- 1/nrow(X) * sum( (test_set$Y - Yhat)^2 )
+}
+
+plot(1:8,mse.test, xlab= 'Number of features in model', ylab='MSE on test set')
+
+```
+

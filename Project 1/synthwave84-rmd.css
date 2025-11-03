@@ -1,0 +1,244 @@
+/* === Synthwave '84 Theme for R Markdown HTML Notebook === */
+
+/* Page background + text */
+body {
+  background: linear-gradient(to bottom, #2a2139 75%, #34294f);
+  color: #fdfdfd;
+  font-family: "Fira Code", monospace;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5 {
+  color: #fc28a8;
+  text-shadow: 0 0 5px #03edf975, 0 0 15px #fc28a875;
+  font-family: "Fira Code", monospace;
+}
+
+/* Inline code */
+p code, li code {
+  background-color: #2a2139;
+  color: #f92aad;
+  text-shadow: 0 0 2px #100c0f, 0 0 5px #dc078e33, 0 0 10px #fff3;
+  padding: 0.1em 0.25em;
+  border-radius: 4px;
+}
+
+/* Code blocks */
+pre, code, .sourceCode {
+  background-color: #2a2139;
+  color: #fdfdfd;
+  font-family: "Fira Code", monospace;
+  border-radius: 8px;
+  padding: 0.75em;
+  overflow-x: auto;
+}
+
+pre.sourceCode {
+  border: 1px solid #fc28a8;
+  box-shadow: 0 0 10px #fc28a875, 0 0 20px #03edf975;
+}
+
+/* --- Syntax highlighting --- */
+.sourceCode .kw {
+  color: #f92aad;
+  text-shadow: 0 0 2px #100c0f, 0 0 5px #dc078e33, 0 0 10px #fff3;
+}
+.sourceCode .dt {
+  color: #6d77b3;
+  text-shadow: 0 0 3px #6d77b355;
+}
+.sourceCode .st {
+  color: #f97e72;
+  text-shadow: 0 0 5px #f97e7275, 0 0 10px #f97e7233;
+}
+.sourceCode .dv {
+  color: #72f1b8;
+  text-shadow: 0 0 2px #100c0f, 0 0 10px #257c5575, 0 0 35px #21272475;
+}
+.sourceCode .co {
+  color: #6d77b3;
+  font-style: italic;
+  text-shadow: 0 0 2px #000, 0 0 10px #6d77b355;
+}
+.sourceCode .fu {
+  color: #fff5f6;
+  text-shadow: 0 0 2px #000, 0 0 10px #fc1f2c75, 0 0 25px #fc1f2c75;
+}
+.sourceCode .va {
+  color: #f4eee4;
+  text-shadow: 0 0 2px #393a33, 0 0 8px #f39f0575;
+}
+.sourceCode .op {
+  color: #03edf9;
+  text-shadow: 0 0 2px #001716, 0 0 3px #03edf975, 0 0 8px #03edf975;
+}
+
+/* --- R output cells --- */
+
+/* Normal output */
+pre.r {
+  background-color: #1e1e2e;
+  color: #fdfdfd;
+  border-left: 3px solid #03edf9;
+  box-shadow: 0 0 8px #03edf975;
+  padding: 0.75em;
+  border-radius: 6px;
+}
+
+/* Console messages */
+pre.r.message {
+  color: #72f1b8;
+  border-left: 3px solid #72f1b8;
+  box-shadow: 0 0 8px #72f1b875;
+}
+
+/* Warnings */
+pre.r.warning {
+  color: #f39f05;
+  border-left: 3px solid #f39f05;
+  box-shadow: 0 0 8px #f39f0575;
+}
+
+/* Errors */
+pre.r.error {
+  color: #fc1f2c;
+  border-left: 3px solid #fc1f2c;
+  box-shadow: 0 0 8px #fc1f2c75;
+}
+
+/* Plots (images) */
+div.figure, img {
+  background-color: #1e1e2e; /* dark frame around plots */
+  border: 2px solid #03edf9;
+  box-shadow: 0 0 15px #03edf975, 0 0 25px #fc28a875;
+  border-radius: 10px;
+  margin: 1em 0;
+  padding: 5px;
+}
+
+
+/* === Fix pack (v4) for Synthwave84 R Markdown === */
+
+/* Title a bit darker with orange-magenta glow */
+.title, h1.title {
+  color: #e8e6e3 !important;
+  text-shadow: 0 0 4px #120e12, 0 0 10px #ff9e6450, 0 0 22px #fc28a870, 0 0 36px #ff9e6430 !important;
+  font-family: "Fira Code", monospace;
+}
+
+/* Section headers in pink */
+h1:not(.title), h2, h3, h4, h5 {
+  color: #fc28a8 !important;
+  text-shadow: 0 0 6px rgba(252, 40, 168, 0.45), 0 0 18px rgba(252, 40, 168, 0.30) !important;
+}
+
+/* Default code text -> pink */
+.sourceCode code,
+pre.sourceCode code,
+pre code,
+code {
+  color: #f92aad !important;
+}
+
+/* Operators & punctuation -> white with cyan glow (avoid container bleed) */
+pre.sourceCode code span.op,
+code.sourceCode span.op,
+pre code span.op,
+pre.sourceCode code span.o,
+code.sourceCode span.o,
+pre code span.o,
+pre.sourceCode code span.p,
+code.sourceCode span.p,
+pre code span.p,
+pre.sourceCode code span.hljs-operator,
+code.sourceCode span.hljs-operator,
+pre code span.hljs-operator,
+pre.sourceCode code span.hljs-punctuation,
+code.sourceCode span.hljs-punctuation,
+pre code span.hljs-punctuation {
+  color: #ffffff !important;
+  text-shadow: 0 0 2px #001716, 0 0 4px #03edf9aa, 0 0 10px #03edf975, 0 0 18px #03edf940 !important;
+  font-weight: 600;
+}
+
+/* Numbers -> light greenish-blue (cover many token classes) */
+pre.sourceCode code span.dv,
+code.sourceCode span.dv,
+pre code span.dv,
+pre.sourceCode code span.bn,
+code.sourceCode span.bn,
+pre code span.bn,
+pre.sourceCode code span.fl,
+code.sourceCode span.fl,
+pre code span.fl,
+pre.sourceCode code span.m,
+code.sourceCode span.m,
+pre code span.m,
+pre.sourceCode code span.mi,
+code.sourceCode span.mi,
+pre code span.mi,
+pre.sourceCode code span.mf,
+code.sourceCode span.mf,
+pre code span.mf,
+pre.sourceCode code span.mo,
+code.sourceCode span.mo,
+pre code span.mo,
+pre.sourceCode code span.il,
+code.sourceCode span.il,
+pre code span.il,
+pre.sourceCode code span.cn,
+code.sourceCode span.cn,
+pre code span.cn,
+pre.sourceCode code span.hljs-number,
+code.sourceCode span.hljs-number,
+pre code span.hljs-number {
+  color: #72f1b8 !important;
+  text-shadow: 0 0 2px #100c0f, 0 0 10px #257c5575, 0 0 28px #1c2a2575 !important;
+}
+
+/* Inline code remains pink */
+p code, li code, td code, th code {
+  color: #f92aad !important;
+}
+
+/* Prevent operator glow from leaking to borders */
+div.sourceCode,
+pre.sourceCode {
+  box-shadow: none !important;
+  border-color: rgba(3, 237, 249, 0.35);
+}
+
+/* === Soft gradient ambience background === */
+:root {
+  --bg-base: #1a1224;           /* deep purple base */
+  --amb-magenta: rgba(252, 40, 168, 0.16);
+  --amb-cyan: rgba(3, 237, 249, 0.10);
+  --amb-orange: rgba(255, 158, 100, 0.16);
+  --amb-vignette: rgba(10, 6, 20, 0.35);
+}
+
+/* Default ambience: magenta/cyan (Project 1 vibe) */
+html, body {
+  background-color: var(--bg-base) !important;
+  background-image:
+    radial-gradient(1200px at 22% 6%, var(--amb-magenta), transparent 60%),
+    radial-gradient(900px at 88% 12%, var(--amb-cyan), transparent 60%),
+    linear-gradient(180deg, rgba(10,6,20,0.0) 0%, var(--amb-vignette) 33%, var(--amb-vignette) 66%, rgba(10,6,20,0.0) 100%);
+  background-attachment: fixed, fixed, fixed;
+  background-repeat: no-repeat;
+  background-size: auto, auto, auto;
+}
+
+/* Optional: "sunset orange" ambience.
+   Add class "sunset" to <body> (see YAML snippet below) to activate. */
+body.sunset {
+  background-image:
+    radial-gradient(1200px at 18% 8%, var(--amb-orange), transparent 60%),
+    radial-gradient(900px at 80% 10%, rgba(252, 40, 168, 0.10), transparent 60%),
+    linear-gradient(180deg, rgba(10,6,20,0.0) 0%, var(--amb-vignette) 33%, var(--amb-vignette) 66%, rgba(10,6,20,0.0) 100%);
+}
+
+/* Code cells readable on ambience */
+pre, pre.sourceCode, div.sourceCode, code {
+  background-color: rgba(10, 12, 18, 0.50);
+}

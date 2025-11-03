@@ -1,0 +1,73 @@
+# Chapter 3.7 Exercise 13
+
+```{r, include=FALSE}
+library("latex2exp")
+```
+
+
+```{r}
+set.seed(1)
+```
+
+a\)-c\)
+```{r}
+x <- rnorm(100) # Creates a sample from random normal distribution with n=100
+eps <- rnorm(100,0,0.25) 
+y <- -1 + 0.5*x + eps
+```
+
+The length of *y* is `r length(y)`, $\beta_0 = -1$, $\beta_1 = 0.5$.
+
+d\)
+```{r}
+plot(x,y)
+```
+
+In the plot we see that
+
+- the Y values are approximately linear to X with a positive correlation. 
+- The average of the y-values at x=0 seems to be around -1, and at x=1 around 0.5. 
+- The observations are most frequent around x=0 and become less frequent symmetrically as |x| increases suggesting X being normally distributed with $\mu=0$. 
+- No obvious variance of the variance.
+- No outliers.
+
+e\)
+```{r}
+lm.fit <- lm(y ~ x)
+```
+
+The method of least squares assumes a linear relationship between Y and X. Based on the scatter plot the assumption seems reasonable. Since there is only one independent variable we don't need to check for multicollinearity or interaction.
+
+```{r}
+summary(lm.fit)
+```
+
+From the summary we that see the model explains 77.8% of the variance in the data ($R^2=0.7784$) with $p<2.2\cdot 10^{-16}$. We also see that both $\hat{\beta}_0 =$ `r coef(lm.fit)[1]` and $\hat{\beta}_1 =$ `r coef(lm.fit)[2]` are statistically significant with $p<2.2\cdot10^{-16}$ for both coefficients. 
+
+The estimated values look very close to the true values with  $\|\hat{\beta}_0-\beta\|=0.00942$ and $\|\hat{\beta}_1-\beta_1\|=0.0003$. We can do a t-test to check if the differences are statistically significant, but without calculating the p-value I would guess that they are not for $\alpha=0.05$
+
+```{r}
+res <- resid(lm.fit)
+plot(y,res, main='Residual plot', xlab = TeX(r'($y_i$)'), ylab = '' )
+title(ylab = TeX(r'($e_i=y_i-\hat{y}_i$)'), line=2.2)
+```
+
+The residuals look like they could be trending upwards suggesting that the data may be nonlinear.
+
+f\) 
+```{r}
+plot(x,y)
+abline(lm.fit, col='red')
+lines(x,y-eps, col='blue')
+legend("topleft", legend=c('Least squares line', 'Population regression line'), col=c('red','blue'), lty=1.1, cex=0.8)
+```
+
+g\)
+
+```{r}
+xsquared <- x^2
+lm2.fit <- lm(y~x + xsquared)
+summary(lm2.fit)
+```
+
+Here we can see that $P(\hat\beta_2=0)=0.164$ hence the observed values do not support including a second degree term in the model for $\alpha=0.05$.

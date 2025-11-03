@@ -1,0 +1,15 @@
+---
+title: "Project 1"
+author: "Simon Kauppinen"
+output:
+  html_document:
+   toc: true
+   css: synthwave84-rmd.css
+---
+
+```{r, child=c('P1.Rmd', 'P2_edit.Rmd', 'P3.Rmd','P4.Rmd')}
+
+```
+
+
+
