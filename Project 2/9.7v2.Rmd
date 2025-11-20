@@ -1,0 +1,151 @@
+---
+title: "Project 2"
+author: "Simon Kauppinen"
+output:
+  html_document:
+   toc: true
+   css: synthwave84-rmd.css
+---
+
+# Chapter 9 Problem 7
+
+a\)
+
+```{r message=FALSE, warning=FALSE}
+library("ISLR2")
+library("e1071")
+```
+
+```{r}
+data <- Auto[,-which(names(Auto)=="mpg")]
+mpg01 <- ifelse(Auto$mpg > median(Auto$mpg), 1, 0)
+df <- data.frame(data,mpg01=as.factor(mpg01))
+```
+
+
+b\)
+```{r}
+set.seed(1)
+tune.linear <- tune(
+  svm,
+  mpg01 ~ .,                
+  data   = df,
+  kernel = "linear",
+  ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100))
+)
+
+summary(tune.linear)
+```
+
+```{r}
+print(tune.linear$best.model)
+```
+
+Here we can see that the best model is the one with cv error = `r tune.linear$performances[as.numeric(rownames(tune.linear$best.parameters)),which(names((tune.linear$performances))=="error")]`.
+The model has cost = `r tune.linear$best.parameters` and `r length(tune.linear$best.model$index)` support vectors.
+
+c\)
+
+```{r}
+set.seed(1)
+tune.polynomial <- tune(
+  svm,
+  mpg01 ~ .,                
+  data   = df,
+  kernel = "polynomial",
+  ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100),
+                degree = c(1,2,3,4,5,6))
+)
+
+summary(tune.polynomial)
+```
+
+```{r}
+print(tune.polynomial$best.model)
+```
+
+Here we can see that the best model with cv.error = `r tune.polynomial$performances[as.numeric(rownames(tune.polynomial$best.parameters)),which(names((tune.polynomial$performances))=="error")]` is the one with cost = `r tune.polynomial$best.parameters$cost` and degree = `r tune.polynomial$best.parameters$degree`. The model has `r length(tune.polynomial$best.model$index)` support vectors.
+
+```{r}
+set.seed(1)
+tune.radial <- tune(
+  svm,
+  mpg01 ~ .,                
+  data   = df,
+  kernel = "radial",
+  ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100),
+                gamma = c(0.5, 1, 2,3,4))
+)
+
+summary(tune.radial)
+```
+
+```{r}
+print(tune.radial$best.model)
+```
+
+Here we can see that the best model with cv.error = `r tune.radial$performances[as.numeric(rownames(tune.radial$best.parameters)),which(names((tune.radial$performances))=="error")]` is the one with cost = `r tune.radial$best.parameters$cost` and gamma = `r tune.radial$best.parameters$gamma`. The model has `r length(tune.radial$best.model$index)` support vectors.
+
+d\)
+
+```{r message=FALSE, warning=FALSE}
+library("ggplot2")
+library("reshape2")
+
+# Plot cross-validation errors for linear kernel
+plot(tune.linear$performances$cost, tune.linear$performances$error,
+     type = "b", log = "x", xlab = "Cost", ylab = "CV Error",
+     main = "Linear SVM - CV Error vs Cost")
+points(tune.linear$best.parameters$cost, 
+       tune.linear$performances[tune.linear$performances$cost == tune.linear$best.parameters$cost, "error"],
+       col = "red", pch = 19, cex = 1.5)
+
+# Heatmaps with best parameters highlighted
+
+# Polynomial SVM heatmap with best parameter highlighted
+polynomial_perf <- tune.polynomial$performances
+best_poly_cost <- tune.polynomial$best.parameters$cost
+best_poly_degree <- tune.polynomial$best.parameters$degree
+
+polynomial_heatmap <- ggplot(polynomial_perf, aes(x = factor(cost), y = factor(degree), fill = error)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "blue", high = "red", name = "CV Error") +
+  geom_text(aes(label = round(error, 3)), color = "white", size = 3) +
+  # Highlight the best parameters
+  geom_tile(data = polynomial_perf[polynomial_perf$cost == best_poly_cost & 
+                                   polynomial_perf$degree == best_poly_degree, ],
+            color = "gold", size = 1.5) +
+  labs(title = paste("Polynomial SVM - Best: Cost =", best_poly_cost, 
+                     ", Degree =", best_poly_degree, "\nError =", 
+                     round(min(polynomial_perf$error), 4)),
+       x = "Cost",
+       y = "Degree") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(polynomial_heatmap)
+
+# Radial SVM heatmap with best parameter highlighted
+radial_perf <- tune.radial$performances
+best_radial_cost <- tune.radial$best.parameters$cost
+best_radial_gamma <- tune.radial$best.parameters$gamma
+
+radial_heatmap <- ggplot(radial_perf, aes(x = factor(cost), y = factor(gamma), fill = error)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "blue", high = "red", name = "CV Error") +
+  geom_text(aes(label = round(error, 3)), color = "white", size = 3) +
+  # Highlight the best parameters
+  geom_tile(data = radial_perf[radial_perf$cost == best_radial_cost & 
+                               radial_perf$gamma == best_radial_gamma, ],
+            color = "gold", size = 1.5) +
+  labs(title = paste("Radial SVM - Best: Cost =", best_radial_cost,
+                     ", Gamma =", best_radial_gamma, "\nError =", 
+                     round(min(radial_perf$error), 4)),
+       x = "Cost",
+       y = "Gamma") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(radial_heatmap)
+```
+

@@ -1,0 +1,13 @@
+---
+title: "Project 2"
+author: "Simon Kauppinen"
+output:
+  html_document:
+   toc: true
+   css: synthwave84-rmd.css
+---
+
+```{r, child=c('7.9_final.Rmd', '8.11.Rmd', '9.7v2.Rmd', '12.10.Rmd')}
+
+```
+

@@ -1,0 +1,104 @@
+---
+title: "Project 2"
+author: "Simon Kauppinen"
+output:
+  html_document:
+   toc: true
+   css: synthwave84-rmd.css
+---
+
+# Chapter 8 Problem 11
+
+a\)
+
+```{r message=FALSE, warning=FALSE}
+library("ISLR2")
+library("gbm")
+
+data <- Caravan
+data$Purchase <- as.integer(data$Purchase == "Yes") #Transforms Purchase values from no and yes to 0 and 1
+training_data <- data[1:1000,]
+test_data <- data[-(1:1000),]
+```
+
+b\)
+
+```{r message=FALSE, warning=FALSE}
+set.seed(1)
+boost.caravan <- gbm(Purchase ~ . , data = training_data, n.trees=1000, 
+                     interaction.depth = 2, shrinkage = 0.01, distribution = "bernoulli")
+#Fits a boosting model to the training pdata with 1000 trees, 0.01 shrinkage and 2 split per tree.
+
+head(summary(boost.caravan, plotit=FALSE)) # Prints the six most important predictors
+```
+
+The most important predictors seem to be `r head(summary(boost.caravan, plotit=FALSE))[[1]]`
+
+c\)
+
+```{r message=FALSE, warning=FALSE}
+yhat.boost <- predict(boost.caravan, newdata=test_data, n.trees=1000, type="response")
+
+yhat.boost <- ifelse(yhat.boost > 0.2, 1, 0)
+
+confusionmatrix <- table(predicted=yhat.boost, true=test_data$Purchase)
+
+print(confusionmatrix)
+```
+
+
+The fraction of people predicted to make a purchase by the boosted tree that in fact made one is $\frac{`r confusionmatrix[4]`}{`r confusionmatrix[2]`+ `r confusionmatrix[4]`} = `r round(confusionmatrix[4]/(confusionmatrix[2]+confusionmatrix[4]),4)`$
+
+```{r message=FALSE, warning=FALSE}
+lr.fit <- glm(Purchase ~ ., data=training_data, family='binomial')
+lr.probs <- predict(lr.fit, test_data, type="response")
+lr.pred <- ifelse(lr.probs > 0.5, 1, 0)
+lr.confusionmatrix <- table(predicted = lr.pred, true= test_data$Purchase)
+
+print(lr.confusionmatrix)
+```
+
+The fraction of people predicted to make a purchase by logistic regression that in fact made one is $\frac{`r lr.confusionmatrix[4]`}{`r lr.confusionmatrix[2]`+ `r lr.confusionmatrix[4]`} = `r round(lr.confusionmatrix[4]/(lr.confusionmatrix[2]+lr.confusionmatrix[4]),4)`$
+
+
+```{r}
+library("class")
+library("kknn")
+
+get_optimal_k <- function(){
+
+train.X <- training_data[,1:ncol(training_data)-1] # X values in training data
+train.Y <- training_data$Purchase # Y values in training data
+
+cv.error <- sapply(seq(1,40,2),function(k){
+  set.seed(1)
+  return(mean(knn.cv(train.X,train.Y,k,l=0,prob=FALSE,use.all=TRUE) != train.Y))
+})
+# Produces a list cv.error containing the MSE of a range of k via CV
+
+return(seq(1,40,2)[which.min(cv.error)])
+}
+#Returns the k with lowest CV MSE
+
+
+# Given k knn.pred returns the predicted Purchase in test data via k nearest neighbors.  
+knn.pred <- function(k){
+  
+  train.X <- training_data[,1:ncol(training_data)-1] #X values in training data
+  train.Y <- training_data$Purchase # Y values in training data
+  test.X <- test_data[,1:ncol(test_data)-1] # X values in test data
+  
+  return(knn(train.X, test.X, train.Y, k=k))
+}
+
+
+
+knn.confusionmatrix <- table(Predicted=knn.pred(get_optimal_k()), True=test_data$Purchase)
+
+print(knn.confusionmatrix)
+
+```
+
+The fraction of people predicted to make a purchase by knn that in fact made one is $\frac{`r knn.confusionmatrix[4]`}{`r knn.confusionmatrix[2]`+ `r knn.confusionmatrix[4]`} = `r round(knn.confusionmatrix[4]/(knn.confusionmatrix[2]+knn.confusionmatrix[4]),4)`$
+
+Between the three models, the boosted tree had the best true positive to false positive ratio and KNN the worst. Perhaps this is an indication that the relationship between X and Y is discontinuous in nature? 

@@ -1,0 +1,166 @@
+---
+title: "Project 1"
+author: "Simon Kauppinen"
+output:
+  html_document:
+   toc: true
+   css: synthwave84-rmd.css
+---
+
+# Chapter 7.9 Problem 9
+
+```{r message=FALSE, warning=FALSE}
+library("latex2exp")
+library("ISLR2")
+library("boot")
+library("glue")
+library("tinytex")
+library("polynom")
+library("MASS")
+library("splines")
+```
+
+a\)
+
+```{r}
+#Uses a degree d polynomial to predict nox with dis.
+poly.fit <- function(d){
+  lm(nox~poly(dis,d), data=Boston)
+}
+
+# A set of points along values of dis to be used later for graphing the image of fitted polynomials.
+x <- with(Boston, seq(min(dis), max(dis), length.out=400))
+
+
+#Plots the fitted polynomial with degree d together with the associated RSS.
+poly.plot <- function(d){
+  pred <- predict(poly.fit(d),newdata=data.frame(dis=x),se.fit=TRUE)
+  rss <- round(sum(poly.fit(d)$residuals^2),4)
+  plot(nox~dis,data=Boston, main=TeX(sprintf(r'(Degree $%d$ fit with $\pm$ 2 SE)',d)),xlab='Dis',ylab='Nox',col='grey')
+  lines(x, pred$fit, lwd=2)
+  lines(x, pred$fit + 2*pred$se.fit, lty="dashed")
+  lines(x, pred$fit - 2*pred$se.fit, lty="dashed")
+  legend("topright",legend=glue('RSS=',rss))
+}
+
+#Plots summary of the fitted cubic polynomial
+summary(poly.fit(3))
+```
+
+In the summary we can see that the p-value for the polynomial regression and each coefficient is very small (p<0.0001). The coefficients of the cubic polynomial are
+
+`r round(summary(poly.fit(3))$coefficients[,1],4)`
+
+
+```{r}
+poly.plot(3)
+```
+
+b\)
+
+
+```{r}
+#Plots the fitted polynomial for degrees 1-10 with their associated RSS
+invisible(sapply(1:10,poly.plot))
+
+```
+
+c\)
+```{r}
+set.seed(1)
+
+get_optimal_d <- function(){
+  
+  #While loop to determine the highest degree such that all predictors are significant.
+  max_degree <- 1
+  while(TRUE){
+    if(all(summary(poly.fit(max_degree))$coefficients[,4] < 0.05)==TRUE){
+      max_degree <- max_degree +1      
+    } else {
+      max_degree <- max_degree -1
+      break}
+  }
+  
+  # Performs 10-fold cross-validation for each polynomial up to the max degree and collects their associated RSS.
+  cv.error <- sapply(1:max_degree,function(d){
+  fit <- glm(nox~poly(dis,d),data=Boston)
+  cv.glm(Boston,fit,K=10)$delta[1]
+  })
+
+  #Returns the degree with the smallest CV error.
+  return(which.min(cv.error))
+}
+
+get_optimal_d()
+```
+
+Based on cross-validation on the polynomials with only significant predictors, the degree of the polynomial with the smallest CV error is `r get_optimal_d()`
+
+d\)
+```{r}
+#Knots are placed at equally-spaced quantiles of dis by the 'df' argument in bs.
+spline.fit <- function(df){
+  return(lm(nox~bs(dis,df=df), data=Boston))
+}
+
+#Function for plotting the regression spline with df degrees of freedom
+spline.plot <- function(df){
+  spline.pred <- predict(spline.fit(df),newdata=data.frame(dis=x),se.fit=TRUE)
+  rss <- round(sum(summary(spline.fit(df))$residuals^2),4)
+  plot(Boston$dis,Boston$nox,xlab='Dis',ylab='Nox',col='grey',
+       main=paste('Regression spline with', df, 'df','\n Dashed lines +- 2 SE'))
+  lines(x,spline.pred$fit,lwd=2)
+  lines(x,spline.pred$fit + 2 *spline.pred$se.fit, lty="dashed")
+  lines(x,spline.pred$fit - 2 *spline.pred$se.fit, lty="dashed")
+  legend("topright", legend=glue('RSS=', rss))
+}
+
+print(summary(spline.fit(4)))
+```
+
+Summary shows that the regression spline with four degrees of freedom has Adjusted R^2 0.7142, p < 2.2e^-16. The coefficients `r round(summary(spline.fit(4))$coefficients[,1],4)` are all significant.
+
+```{r}
+spline.plot(4)
+```
+
+e\)
+```{r}
+invisible(sapply(4:10,spline.plot))
+```
+
+From the plots we see that the RSS usually decreases as the df increases, however the polynomials also seem increasingly overfitted.
+
+```{r warning=FALSE}
+set.seed(1)
+
+get_optimal_df <- function(){
+  
+  #While loop to determine the largest degrees of freedom such that all predictors are significant.
+  max_df <- 4
+  while(TRUE){
+    if(all(summary(spline.fit(max_df))$coefficients[,4] < 0.05)==TRUE){
+      max_df <- max_df +1      
+    } else {
+      max_df <- max_df -1
+      break}
+  }
+  
+  # Performs 10-fold cross-validation for each regression spline up to the max degrees of freedom and collects their associated RSS.
+  cv.error <- sapply(4:max_df,function(d){
+  fit <- glm(nox~bs(dis,df=d),data=Boston)
+  cv.glm(Boston,fit,K=10)$delta[1]
+  })
+
+  #Returns the number of degrees of freedom associated with the smallest CV error.
+  return(which.min(cv.error)+3)
+}
+
+print(get_optimal_df())
+
+print(summary(spline.fit(get_optimal_df())))
+```
+
+Based on cross-validation on the range of degrees of freedom with only significant predictors, the number of df with the smallest CV error is `r get_optimal_df()`. From the plots in d\) we can see that it has `r round(sum(summary(spline.fit(5))$residuals^2),4)` RSS
+
+
